@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Your Attendance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      padding: 1rem;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .emoji { font-size: 3rem; margin-bottom: 1rem; }
+    h2 { font-size: 1.5rem; margin-bottom: 0.4rem; }
+    p.sub { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+    input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    input:focus { border-color: #6366f1; }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #4f46e5; }
+    button:disabled { background: #334155; cursor: not-allowed; }
+    #status {
+      margin-top: 1.2rem;
+      font-size: 0.95rem;
+      min-height: 1.5rem;
+    }
+    .success { color: #34d399; }
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">✋</div>
+    <h2>Mark Your Attendance</h2>
+    <p class="sub">Enter your full name and tap Submit</p>
+
+    <input type="text" id="nameInput" placeholder="Your full name" autocomplete="off" />
+    <button id="submitBtn" onclick="submitAttendance()">Submit Attendance</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // ✅ REPLACE THIS with your Apps Script Web App URL
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+    async function submitAttendance() {
+      const name = document.getElementById("nameInput").value.trim();
+      const status = document.getElementById("status");
+      const btn = document.getElementById("submitBtn");
+
+      if (!name) {
+        status.innerHTML = '<span class="error">⚠️ Please enter your name.</span>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+      status.innerHTML = "";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name })
+        });
+
+        status.innerHTML = '<span class="success">✅ Attendance marked! Thank you, ' + name + '.</span>';
+        document.getElementById("nameInput").value = "";
+      } catch (err) {
+        status.innerHTML = '<span class="error">❌ Something went wrong. Try again.</span>';
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Submit Attendance";
+    }
+
+    document.getElementById("nameInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") submitAttendance();
+    });
+  </script>
+</body>
+</html>
